@@ -25,20 +25,24 @@ const GLchar* vertexShaderSource = "#version 330 core\n"
 	"void main()\n"
 	"{\n"
 	// See how we directly give a vec3 to vec4's constructor
-    "gl_Position = vec4(position, 1.0);\n"
-	// Set the out var to dark-red
-	"vertexColor = vec4(0.5f, 0.0f, 0.0f, 1.0f);"
+    "gl_Position = vec4(position, 1.0f);\n"
+	"float r, g, b;\n"
+	"r = (gl_Position.x + gl_Position.y + 0.3) /2 ;\n"
+	"g = (-gl_Position.x + gl_Position.y + 0.3) /2 ;\n"
+	"b = (-gl_Position.y) + 0.6;\n"
+	// Set the out var to position
+	"vertexColor = vec4(r, g, b, 1.0f);"
     "}\0";
+//
 const GLchar* fragmentShaderSource = "#version 330 core\n"
 	// The input var from the vert shader(same name and type)
 	"in vec4 vertexColor;\n"
 
 	"out vec4 color;\n"
 	// We set this var in OpenGL code.
-	"uniform vec4 ourColor;\n"
-    "void main()\n"
+	"void main()\n"
     "{\n"
-    "color = ourColor;\n"
+    "color = vertexColor;\n"
     "}\n\0";
 
 using namespace std;
@@ -131,7 +135,13 @@ int main()
 		// second triangle
          0.5f, 0.5f, 0.0f,    // Top Right 
          0.0f, 0.5f, 0.0f,  // Top Centre
-		 0.25f, -0.5f, 0.0f  // Bot Right
+		 0.25f, -0.5f, 0.0f,  // Bot Right
+
+		// big triangle 
+		-1.0f, 1.0f, 0.0f,    // Top Left
+		 1.0f, 1.0f, 0.0f,    // Top Right 
+         0.0f, -1.0f, 0.0f	 // Bot Centre
+		
 	};
 
 
@@ -167,24 +177,19 @@ int main()
 
         // Render
         // Clear the colorbuffer
-        glClearColor(0.7f, 0.7f, 0.6f, 1.0f);
+        glClearColor(0.1f, 0.12f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-		// ..:: UNIFORMS ::..
-		// Bad fashion
-	GLfloat timeValue = glfwGetTime();
-	GLfloat greenValue = (cos(timeValue))/2 + 0.5;
-	GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-
-        // Draw square
         glUseProgram(shaderProgram);
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-        glBindVertexArray(VAO1);
+	    glBindVertexArray(VAO1);
 
 		// draw first tr
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
 		// draw second tr
-		glDrawArrays(GL_TRIANGLES, 3, 3);
+		// glDrawArrays(GL_TRIANGLES, 3, 3);
+		
+		glDrawArrays(GL_TRIANGLES, 6, 3);
+		
 		// Unbind first vert array
 		glBindVertexArray(0);
 
