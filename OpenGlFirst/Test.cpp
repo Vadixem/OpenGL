@@ -34,9 +34,11 @@ const GLchar* fragmentShaderSource = "#version 330 core\n"
 	"in vec4 vertexColor;\n"
 
 	"out vec4 color;\n"
+	// We set this var in OpenGL code.
+	"uniform vec4 ourColor;\n"
     "void main()\n"
     "{\n"
-    "color = vertexColor;\n"
+    "color = ourColor;\n"
     "}\n\0";
 
 using namespace std;
@@ -73,6 +75,7 @@ int main()
 	// Wireframe mode
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	
     // Build and compile our shader program
     // Vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -114,6 +117,8 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+	// ..:: UNIFORMS ::..
+	
 
     // Set up vertex data (and buffer(s)) and attribute pointers for two triangles.
     GLfloat vertices[] = 
@@ -165,8 +170,15 @@ int main()
         glClearColor(0.7f, 0.7f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+		// ..:: UNIFORMS ::..
+		// Bad fashion
+	GLfloat timeValue = glfwGetTime();
+	GLfloat greenValue = (sin(timeValue) / 2) + 0.5;
+	GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+
         // Draw square
         glUseProgram(shaderProgram);
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(VAO1);
 
 		// draw first tr
