@@ -173,7 +173,7 @@ int main()
 		// ..:: UNIFORMS ::..
 		// Bad fashion
 	GLfloat timeValue = glfwGetTime();
-	GLfloat greenValue = (sin(timeValue) / 2) + 0.5;
+	GLfloat greenValue = (cos(timeValue))/2 + 0.5;
 	GLint vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
 
         // Draw square
