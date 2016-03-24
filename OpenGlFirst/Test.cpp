@@ -8,7 +8,8 @@
 #include <GLFW/glfw3.h>
 
 
-// Function prototypes
+// Function prototypes  
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 // Window dimensions
@@ -28,7 +29,8 @@ const GLchar* fragmentShaderSource = "#version 330 core\n"
     "color = vec4(0.02f, 0.2f, 0.7f, 1.0f);\n"
     "}\n\0";
 
-
+using namespace std;
+	
 /* DRAW 2 TRIANGLES */
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -94,7 +96,8 @@ int main()
     glLinkProgram(shaderProgram);
     // Check for linking errors
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (!success) 
+	{
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
@@ -103,7 +106,8 @@ int main()
 
 
     // Set up vertex data (and buffer(s)) and attribute pointers for two triangles.
-    GLfloat vertices[] = {
+    GLfloat vertices[] = 
+	{
         // first triangle
 		-0.5f, 0.5f, 0.0f,    // Top Left
 		0.0f, 0.5f, 0.0f,  // Top Centre
@@ -115,12 +119,14 @@ int main()
 		 0.25f, -0.5f, 0.0f  // Bot Right
 	};
 
-    GLuint VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+
+	GLuint VBO1, VAO1;
+    glGenVertexArrays(1, &VAO1);
+    glGenBuffers(1, &VBO1);
+
     // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindVertexArray(VAO1);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO1);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
@@ -130,6 +136,13 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
 
     glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
+
+
+	
+	// How much vertex attribs can be used
+	GLint nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	cout << "Maximum nr of vertex attribs supported: " << nrAttributes << endl;
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -144,26 +157,30 @@ int main()
 
         // Draw square
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
+        glBindVertexArray(VAO1);
 
 		// draw first tr
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		// draw second tr
 		glDrawArrays(GL_TRIANGLES, 3, 3);
-
-        glBindVertexArray(0);
+		// Unbind first vert array
+		glBindVertexArray(0);
 
         // Swap the screen buffers
 		//
         glfwSwapBuffers(window);
     }
     // Properly de-allocate all resources once they've outlived their purpose
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    // Terminate GLFW, clearing any resources allocated by GLFW.
+    glDeleteVertexArrays(1, &VAO1);
+    // 
+	glDeleteBuffers(1, &VBO1);
+    
+	// Terminate GLFW, clearing any resources allocated by GLFW.
     glfwTerminate();
+
     return 0;
 }
+
 
 // Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
