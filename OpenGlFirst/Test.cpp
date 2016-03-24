@@ -17,16 +17,26 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 
 // Shaders
 const GLchar* vertexShaderSource = "#version 330 core\n"
+	// The position var has attrib position 0
+
     "layout (location = 0) in vec3 position;\n"
-    "void main()\n"
-    "{\n"
-    "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
+	// Specify a colour output to the fragment shader	
+    "out vec4 vertexColor;"
+	"void main()\n"
+	"{\n"
+	// See how we directly give a vec3 to vec4's constructor
+    "gl_Position = vec4(position, 1.0);\n"
+	// Set the out var to dark-red
+	"vertexColor = vec4(0.5f, 0.0f, 0.0f, 1.0f);"
     "}\0";
 const GLchar* fragmentShaderSource = "#version 330 core\n"
-    "out vec4 color;\n"
+	// The input var from the vert shader(same name and type)
+	"in vec4 vertexColor;\n"
+
+	"out vec4 color;\n"
     "void main()\n"
     "{\n"
-    "color = vec4(0.02f, 0.2f, 0.7f, 1.0f);\n"
+    "color = vertexColor;\n"
     "}\n\0";
 
 using namespace std;
