@@ -57,18 +57,21 @@ int main()
 
 
     // Build and compile our shader program
-    Shader ourShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\textures.vs", "C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\textures.frag");
+    Shader ourShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\textures.vs", 
+		"C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\textures.frag");
 
 
     // Set up vertex data (and buffer(s)) and attribute pointers
-    GLfloat vertices[] = {
+    GLfloat vertices[] = 
+	{
         // Positions          // Colors           // Texture Coords
          0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // Top Right
          0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // Bottom Right
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
         -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left 
     };
-    GLuint indices[] = {  // Note that we start from 0!
+    GLuint indices[] =
+	{  // Note that we start from 0!
         0, 1, 3, // First Triangle
         1, 2, 3  // Second Triangle
     };
@@ -98,10 +101,13 @@ int main()
     glBindVertexArray(0); // Unbind VAO
 
 
-    // Load and create a texture 
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture); // All upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // Load and create 2 textures 
+    GLuint texture1, texture2;
+    glGenTextures(1, &texture1);
+    glGenTextures(2, &texture2);
+
+	// ..:: First texture ::..
+	glBindTexture(GL_TEXTURE_2D, texture1); // All upcoming GL_TEXTURE_2D operations now have effect on this texture object
     // Set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -110,12 +116,31 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // Load image, create texture and generate mipmaps
     int width, height;
-    unsigned char* image = SOIL_load_image("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\images\\wall.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+    unsigned char* image = SOIL_load_image("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\images\\wall.jpg",
+		&width, &height, 0, SOIL_LOAD_RGB);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
 
+/* ---------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+	// ..:: Second texture ::.. 
+	glBindTexture(GL_TEXTURE_2D, texture2); // All upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // Set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // Set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // Load image, create texture and generate mipmaps
+    image = SOIL_load_image("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\images\\trump.jpg",
+		&width, &height, 0, SOIL_LOAD_RGB);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    SOIL_free_image_data(image);
+    glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
+	
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -128,10 +153,16 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-
-        // Bind Texture
-        glBindTexture(GL_TEXTURE_2D, texture);
-
+		
+		glActiveTexture(GL_TEXTURE0);
+        // Bind Texture1
+		glBindTexture(GL_TEXTURE_2D, texture1);
+		glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);
+		glActiveTexture(GL_TEXTURE1);
+		// Bind Texture2
+		glBindTexture(GL_TEXTURE_2D, texture2);
+		glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture2"), 1);
+        
         // Activate shader
         ourShader.Use();       
         
@@ -140,7 +171,7 @@ int main()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
-        // Swap the screen buffers
+	        // Swap the screen buffers
         glfwSwapBuffers(window);
     }
     // Properly de-allocate all resources once they've outlived their purpose
