@@ -9,5 +9,5 @@
     void main()
     {
     color = mix(texture(ourTexture1, TexCoord),
-   texture(ourTexture2, TexCoord), 0.6);
+    texture(ourTexture2, TexCoord), 0.6);
     }
