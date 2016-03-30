@@ -29,6 +29,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 
+
+
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
@@ -65,10 +67,10 @@ int main()
     GLfloat vertices[] = 
 	{
         // Positions          // Colors           // Texture Coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   2.0f, 2.0f, // Top Right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f, // Bottom Right
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   20.0f, 20.0f, // Top Right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   20.0f, 0.0f, // Bottom Right
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 2.0f  // Top Left 
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 20.0f  // Top Left 
     };
     GLuint indices[] =
 	{  // Note that we start from 0!
@@ -131,8 +133,8 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     // Set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     // Load image, create texture and generate mipmaps
     image = SOIL_load_image("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\images\\trump.jpg",
 		&width, &height, 0, SOIL_LOAD_RGB);
@@ -141,7 +143,7 @@ int main()
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
 	
-
+	
     // Game loop
     while (!glfwWindowShouldClose(window))
     {
@@ -188,6 +190,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+	//// If user presses up then 1st texture gets more visible, otherwise second
+	//if (key == GLFW_KEY_UP && action == GLFW_PRESS && textVisible < 1.0f)
+	//{
+	//	textVisible += 0.1f;
+	//}
+	//else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && textVisible > 0.0f)
+	//{
+	//	textVisible += 0.1f;
+	//}
 }
 
 	/*
