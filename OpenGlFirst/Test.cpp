@@ -29,6 +29,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 
+// Value that defines visibility of textures
+GLfloat textVisible = 0.5f;
 
 
 // The MAIN function, from here we start the application and run the game loop
@@ -67,10 +69,10 @@ int main()
     GLfloat vertices[] = 
 	{
         // Positions          // Colors           // Texture Coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   20.0f, 20.0f, // Top Right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   20.0f, 0.0f, // Bottom Right
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // Top Right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // Bottom Right
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 20.0f  // Top Left 
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left 
     };
     GLuint indices[] =
 	{  // Note that we start from 0!
@@ -143,7 +145,9 @@ int main()
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
 	
-	
+	// Create uniform for textVisible
+	glUniform1f(glGetUniformLocation(ourShader.Program, "textVisib;e"), textVisible);
+
     // Game loop
     while (!glfwWindowShouldClose(window))
     {
@@ -165,6 +169,8 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture2);
 		glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture2"), 1);
         
+		// Send textVisible to shaders via uniforms
+		glUniform1f(glGetUniformLocation(ourShader.Program, "textVisible"), textVisible);
         // Activate shader
         ourShader.Use();       
         
@@ -190,15 +196,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
-	//// If user presses up then 1st texture gets more visible, otherwise second
-	//if (key == GLFW_KEY_UP && action == GLFW_PRESS && textVisible < 1.0f)
-	//{
-	//	textVisible += 0.1f;
-	//}
-	//else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && textVisible > 0.0f)
-	//{
-	//	textVisible += 0.1f;
-	//}
+	// If user presses up then 1st texture gets more visible, otherwise second
+	if (key == GLFW_KEY_UP && action == GLFW_PRESS && textVisible+0.1f < 1.1f )
+	{
+		textVisible += 0.1f;
+	}
+	else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS &&  textVisible-0.1 > 0.0f)
+	{
+		textVisible -= 0.1f;
+	} 
 }
 
 	/*
