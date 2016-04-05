@@ -136,7 +136,7 @@ int main()
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-	// Specify orthogonal projection matrix
+		// Specify orthogonal projection matrix
 	glm::ortho
 		( 
 		0.0f,	// left coordinate
@@ -146,8 +146,23 @@ int main()
 		0.1f,   // distance to near plane
 		100.f	// to far planef
 		);
+	
+	
 
-    // Game loop
+	// Init model matrix and pitch it(x-axis) by 55 degrees.
+	glm::mat4 model;
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	// Move all the scene far by z-axis by 3 units
+	glm::mat4 view;
+	view = glm::translate(view, glm::vec3(0.f, 0.f, -1.1f));
+
+	// Projection matrix.
+	glm::mat4 projection;
+	projection = glm::perspective(45.0f, (float)WIDTH/(float)HEIGHT, 0.1f, 100.f);
+
+
+	// Game loop
     while (!glfwWindowShouldClose(window))
     {
         // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
@@ -157,6 +172,18 @@ int main()
         // Clear the colorbuffer
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+	
+	// Create uniforms for model, view and proj matrices
+	GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
+	GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
+	GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
+	
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+	
 
 
         // Bind Textures using texture units
@@ -170,15 +197,7 @@ int main()
         // Activate shader
         ourShader.Use();       
 
-        // Create transformations
-        glm::mat4 transform;
-        transform = glm::translate(transform, glm::vec3(0.f, 0.f, 0.f));
-		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 1.5f, glm::vec3(1.0f, 1.0f, 0.0f));
-		// Get matrix's uniform location and set matrix
-        GLint transformLoc = glGetUniformLocation(ourShader.Program, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-        
-        // Draw container
+       // Draw container
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
