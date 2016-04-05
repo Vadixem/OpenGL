@@ -136,6 +136,16 @@ int main()
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+	// Specify orthogonal projection matrix
+	glm::ortho
+		( 
+		0.0f,	// left coordinate
+		800.f,	// right coord
+		0.0f,	// bottom
+		600.f,	// top coord of frustrum (усеченный конус)
+		0.1f,   // distance to near plane
+		100.f	// to far planef
+		);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -162,10 +172,9 @@ int main()
 
         // Create transformations
         glm::mat4 transform;
-        transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
-        transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 12.5f, glm::vec3(1.0f, 1.0f, 0.0f));
-
-        // Get matrix's uniform location and set matrix
+        transform = glm::translate(transform, glm::vec3(0.f, 0.f, 0.f));
+		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 1.5f, glm::vec3(1.0f, 1.0f, 0.0f));
+		// Get matrix's uniform location and set matrix
         GLint transformLoc = glGetUniformLocation(ourShader.Program, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
         
