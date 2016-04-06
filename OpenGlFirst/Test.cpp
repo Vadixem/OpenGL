@@ -148,7 +148,8 @@ int main()
     // ===================
     // Texture 2
     // ===================
-    glGenTextures(1, &texture2);
+    
+	glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
     // Set our texture parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -178,12 +179,9 @@ int main()
 	// Init model matrix and pitch it(x-axis) by 55 degrees.
 	glm::mat4 model;
 	
-	// Rotate cube over time.
-		model = glm::rotate(model, (GLfloat)glfwGetTime() * 0.1f,
-			glm::vec3(0.5f, 1.0f, 0.0f));
 	// Move all the scene far by z-axis by 3 units
 	glm::mat4 view;
-	view = glm::translate(view, glm::vec3(0.f, 0.f, -1.1f));
+	view = glm::translate(view, glm::vec3(0.f, 0.f, -1.8f));
 
 	// Projection matrix.
 	glm::mat4 projection;
@@ -200,6 +198,11 @@ int main()
         // Clear the colorbuffer
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+
+			// Rotate cube over time.
+		model = glm::rotate(model, cosf((GLfloat)glfwGetTime()) * 0.008f,
+	glm::vec3(0.5f, 1.0f, 0.0f));
 
 
 	// Create uniforms for model, view and proj matrices
