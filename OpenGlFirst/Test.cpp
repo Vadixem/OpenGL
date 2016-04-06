@@ -28,6 +28,7 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
+	
     // Init GLFW
     glfwInit();
     // Set all the required options for GLFW
@@ -187,6 +188,23 @@ int main()
 	glm::mat4 projection;
 	projection = glm::perspective(45.0f, (float)WIDTH/(float)HEIGHT, 0.1f, 100.f);
 
+	// Enable depth testing
+	glEnable(GL_DEPTH_TEST);
+
+	// Draw moar cubes!
+	glm::vec3 cubePositions[] = 
+	{
+		glm::vec3( 0.0f, 0.0f, 0.0f),
+		glm::vec3( 2.0f, 5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3( 2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f, 3.0f, -7.5f),
+		glm::vec3( 1.3f, -2.0f, -2.5f),
+		glm::vec3( 1.5f, 2.0f, -2.5f),
+		glm::vec3( 1.5f, 0.2f, -1.5f),
+		glm::vec3(-1.3f, 1.0f, -1.5f) 
+	};
 
 	// Game loop
     while (!glfwWindowShouldClose(window))
@@ -197,11 +215,11 @@ int main()
         // Render
         // Clear the colorbuffer
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-			// Rotate cube over time.
-		model = glm::rotate(model, cosf((GLfloat)glfwGetTime()) * 0.008f,
+	// Rotate cube over time.
+	model = glm::rotate(model, cosf((GLfloat)glfwGetTime()) * 0.008f,
 	glm::vec3(0.5f, 1.0f, 0.0f));
 
 
@@ -210,11 +228,8 @@ int main()
 	GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
 	GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
 	
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-	
 
 
         // Bind Textures using texture units
@@ -230,7 +245,18 @@ int main()
 
        // Draw container
         glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (GLuint i = 0; i < 10; ++i)
+		{
+			glm::mat4 model;
+			model = glm::translate(model,
+				glm::vec3(cubePositions[i].x,
+				cubePositions[i].y,
+				cubePositions[i].z + cosf(glfwGetTime()) - 1.f));
+			GLfloat angle = 20.f * i;
+			model = glm::rotate(model, angle, glm::vec3(1.f, .3f, .5f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
         glBindVertexArray(0);
 
         // Swap the screen buffers
