@@ -186,7 +186,7 @@ int main()
 
 	// Projection matrix.
 	glm::mat4 projection;
-	projection = glm::perspective(45.0f, (float)WIDTH/(float)HEIGHT, 0.1f, 100.f);
+	projection = glm::perspective(45.0f, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -205,6 +205,7 @@ int main()
 		glm::vec3( 1.5f, 0.2f, -1.5f),
 		glm::vec3(-1.3f, 1.0f, -1.5f) 
 	};
+
 
 	// Game loop
     while (!glfwWindowShouldClose(window))
@@ -249,9 +250,9 @@ int main()
 		{
 			glm::mat4 model;
 			model = glm::translate(model,
-				glm::vec3(cubePositions[i].x,
-				cubePositions[i].y,
-				cubePositions[i].z + cosf(glfwGetTime()) - 1.f));
+				glm::vec3(cubePositions[i].x + 1/tanf(glfwGetTime()) / 2 ,
+				cubePositions[i].y + tanf(glfwGetTime()) / 3,
+				cubePositions[i].z + cosf(glfwGetTime())*3 - 1.f));
 			GLfloat angle = 20.f * i;
 			model = glm::rotate(model, angle, glm::vec3(1.f, .3f, .5f));
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
