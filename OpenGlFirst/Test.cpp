@@ -206,7 +206,14 @@ int main()
 		glm::vec3(-1.3f, 1.0f, -1.5f) 
 	};
 
-
+	// Look at
+	/*glm::mat4 view;
+	view = glm::lookAt(
+		glm::vec3(0.0f, 0.0f, 3.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f));
+*/
+	
 	// Game loop
     while (!glfwWindowShouldClose(window))
     {
@@ -229,6 +236,18 @@ int main()
 	GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
 	GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
 	
+		// Create rotation around y axis
+		GLfloat radius = 10.f;
+		GLfloat camX = sinf(glfwGetTime()) * radius;
+		GLfloat camZ = cos(glfwGetTime()) * radius;
+		glm::mat4 view;
+		view = glm::lookAt(
+			glm::vec3(camX, 0.0f, camZ),
+			glm::vec3(0.0, 0.0f, 0.0f),
+			glm::vec3(0.f, 1.f, 0.f)
+			);
+
+
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -241,8 +260,13 @@ int main()
         glBindTexture(GL_TEXTURE_2D, texture2);
         glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture2"), 1);
 
-        // Activate shader
+        
+	
+		// Activate shader
         ourShader.Use();       
+
+
+
 
        // Draw container
         glBindVertexArray(VAO);
@@ -250,9 +274,9 @@ int main()
 		{
 			glm::mat4 model;
 			model = glm::translate(model,
-				glm::vec3(cubePositions[i].x + 1/tanf(glfwGetTime()) / 2 ,
-				cubePositions[i].y + tanf(glfwGetTime()) / 3,
-				cubePositions[i].z + cosf(glfwGetTime())*3 - 1.f));
+				glm::vec3(cubePositions[i].x,
+				cubePositions[i].y ,
+				cubePositions[i].z ));
 			GLfloat angle = 20.f * i;
 			model = glm::rotate(model, angle, glm::vec3(1.f, .3f, .5f));
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
