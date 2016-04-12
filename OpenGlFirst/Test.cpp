@@ -21,6 +21,9 @@
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
+// For pseudo-parrallel input handling
+void do_movement();
+
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 
@@ -30,6 +33,10 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 	glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 3.f);
 	glm::vec3 cameraFront = glm::vec3(0.f, 0.f, -1.f);
 	glm::vec3 cameraUp = glm::vec3(0.f, 1.f, 0.f);
+
+// For input handling
+	bool keys[1024];
+
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -226,6 +233,7 @@ int main()
     {
         // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
         glfwPollEvents();
+		do_movement();
 
         // Render
         // Clear the colorbuffer
@@ -238,10 +246,6 @@ int main()
 	GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
 	GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
 	
-		// Create rotation around y axis
-		GLfloat radius = 10.f;
-		GLfloat camX = sinf(glfwGetTime()) * radius;
-		GLfloat camZ = cosf(glfwGetTime()) * radius;
 		glm::mat4 view;
 		// Create moveable and controllable point viewer
 		view = glm::lookAt(
@@ -299,14 +303,25 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+    if (key >= 0 && key < 1024)
+    {
+        if (action == GLFW_PRESS)
+            keys[key] = true;
+        else if (action == GLFW_RELEASE)
+            keys[key] = false;
+    }
+}
 
-	GLfloat cameraSpeed = 0.05f;
-	if (key == GLFW_KEY_W)
-		cameraPos += cameraSpeed + cameraFront;
-	if (key == GLFW_KEY_S)
-		cameraPos -= cameraSpeed + cameraFront;
-	if (key == GLFW_KEY_A)
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * 10.f;
-	if (key == GLFW_KEY_D)
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * 10.f;
+void do_movement()
+{
+    // Camera controls
+    GLfloat cameraSpeed = 0.01f;
+    if (keys[GLFW_KEY_W])
+        cameraPos += cameraSpeed * cameraFront;
+    if (keys[GLFW_KEY_S])
+        cameraPos -= cameraSpeed * cameraFront;
+    if (keys[GLFW_KEY_A])
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (keys[GLFW_KEY_D])
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
