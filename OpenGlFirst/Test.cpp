@@ -7,6 +7,7 @@
 // GLFW
 #include <GLFW/glfw3.h>
 
+
 // Other Libs
 #include <SOIL/SOIL.h>
 // GLM Mathematics
@@ -17,13 +18,18 @@
 // Other includes
 #include "Shader.h"
 
-
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
 
+
+	// Walk around
+	// Declare it outsides main() so key_callback could use it
+	glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 3.f);
+	glm::vec3 cameraFront = glm::vec3(0.f, 0.f, -1.f);
+	glm::vec3 cameraUp = glm::vec3(0.f, 1.f, 0.f);
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -174,13 +180,13 @@ int main()
 		0.0f,	// bottom
 		600.f,	// top coord of frustrum (усеченный конус)
 		0.1f,   // distance to near plane
-		100.f	// to far planef
+		100.f	// to far plane
 		);
 	
 	// Init model matrix and pitch it(x-axis) by 55 degrees.
 	glm::mat4 model;
 	
-	// Move all the scene far by z-axis by 3 units
+	// Move all the scene far by z-axis by 3 units( I lied)
 	glm::mat4 view;
 	view = glm::translate(view, glm::vec3(0.f, 0.f, -1.8f));
 
@@ -200,7 +206,7 @@ int main()
 		glm::vec3(-3.8f, -2.0f, -12.3f),
 		glm::vec3( 2.4f, -0.4f, -3.5f),
 		glm::vec3(-1.7f, 3.0f, -7.5f),
-		glm::vec3( 1.3f, -2.0f, -2.5f),
+
 		glm::vec3( 1.5f, 2.0f, -2.5f),
 		glm::vec3( 1.5f, 0.2f, -1.5f),
 		glm::vec3(-1.3f, 1.0f, -1.5f) 
@@ -213,6 +219,7 @@ int main()
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f));
 */
+
 	
 	// Game loop
     while (!glfwWindowShouldClose(window))
@@ -226,11 +233,6 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-	// Rotate cube over time.
-	model = glm::rotate(model, cosf((GLfloat)glfwGetTime()) * 0.008f,
-	glm::vec3(0.5f, 1.0f, 0.0f));
-
-
 	// Create uniforms for model, view and proj matrices
 	GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
 	GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
@@ -239,12 +241,13 @@ int main()
 		// Create rotation around y axis
 		GLfloat radius = 10.f;
 		GLfloat camX = sinf(glfwGetTime()) * radius;
-		GLfloat camZ = cos(glfwGetTime()) * radius;
+		GLfloat camZ = cosf(glfwGetTime()) * radius;
 		glm::mat4 view;
+		// Create moveable and controllable point viewer
 		view = glm::lookAt(
-			glm::vec3(camX, 0.0f, camZ),
-			glm::vec3(0.0, 0.0f, 0.0f),
-			glm::vec3(0.f, 1.f, 0.f)
+			cameraPos,
+			cameraPos + cameraFront,
+			cameraUp
 			);
 
 
@@ -259,14 +262,9 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
         glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture2"), 1);
-
         
-	
 		// Activate shader
         ourShader.Use();       
-
-
-
 
        // Draw container
         glBindVertexArray(VAO);
@@ -301,4 +299,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+
+	GLfloat cameraSpeed = 0.05f;
+	if (key == GLFW_KEY_W)
+		cameraPos += cameraSpeed + cameraFront;
+	if (key == GLFW_KEY_S)
+		cameraPos -= cameraSpeed + cameraFront;
+	if (key == GLFW_KEY_A)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * 10.f;
+	if (key == GLFW_KEY_D)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * 10.f;
 }
