@@ -20,9 +20,9 @@
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-
 // For pseudo-parrallel input handling
 void do_movement();
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -37,6 +37,18 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 // For input handling
 	bool keys[1024];
 
+// Time between current frame and last frame.
+	GLfloat deltaTime = 0.f;
+// Time of last frame
+	GLfloat lastFrame = 0.f;
+// Current frame for tracking time spent on rendering last frame
+	GLfloat currentFrame;
+	
+// Set cursor to the center of the screen
+	GLfloat lastX = WIDTH/2, lastY = HEIGHT/2;
+
+// Add global yaw and pitch values
+	GLfloat yaw = 0.f, pitch = 0.f; 
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -56,6 +68,8 @@ int main()
 
     // Set the required callback functions
     glfwSetKeyCallback(window, key_callback);
+	// Set callback func for mouse input
+	glfwSetCursorPosCallback(window, mouse_callback);
 
     // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
     glewExperimental = GL_TRUE;
@@ -65,6 +79,9 @@ int main()
     // Define the viewport dimensions
     glViewport(0, 0, WIDTH, HEIGHT);
 
+	// Capture cursor and hide it
+	// After this call, wherever we move the mouse it won’t be visible and it should not leave the window
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Build and compile our shader program
 	    Shader ourShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\textures.vs", 
@@ -219,15 +236,6 @@ int main()
 		glm::vec3(-1.3f, 1.0f, -1.5f) 
 	};
 
-	// Look at
-	/*glm::mat4 view;
-	view = glm::lookAt(
-		glm::vec3(0.0f, 0.0f, 3.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f));
-*/
-
-	
 	// Game loop
     while (!glfwWindowShouldClose(window))
     {
@@ -254,6 +262,10 @@ int main()
 			cameraUp
 			);
 
+	// Time from moment glfw initialized.
+	currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
 
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -315,7 +327,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void do_movement()
 {
     // Camera controls
-    GLfloat cameraSpeed = 0.01f;
+    GLfloat cameraSpeed = 5.f * deltaTime;
     if (keys[GLFW_KEY_W])
         cameraPos += cameraSpeed * cameraFront;
     if (keys[GLFW_KEY_S])
@@ -324,4 +336,32 @@ void do_movement()
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (keys[GLFW_KEY_D])
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+void mouse_callback(GLFWwindow * window, double xpos, double ypos)
+{
+	GLfloat xoffset = xpos - lastX;
+	GLfloat yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	GLfloat sensitivity = 0.05f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	// Add the offset values
+	yaw += xoffset;
+	pitch += yoffset;
+
+	// Add constraints to camera so user cannot do some weird cam moves
+	if (pitch > 89.f)
+		pitch = 89.f;
+	if (pitch < -89.f)
+		pitch = -89.f;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+	front.y = sin(glm::radians(pitch));
+	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+	cameraFront = glm::normalize(front);
 }
