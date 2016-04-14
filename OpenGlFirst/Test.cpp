@@ -45,10 +45,14 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 	GLfloat currentFrame;
 	
 // Set cursor to the center of the screen
-	GLfloat lastX = WIDTH/2, lastY = HEIGHT/2;
+	GLfloat lastX = 400, lastY = 300;
 
 // Add global yaw and pitch values
-	GLfloat yaw = 0.f, pitch = 0.f; 
+	GLfloat yaw   = -90.0f;	// Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right (due to how Eular angles work) so we initially rotate a bit to the left.
+	GLfloat pitch = 0.f; 
+
+// This bool helps in preventing cam jumps
+	GLboolean firstMouse = true;
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -340,6 +344,14 @@ void do_movement()
 
 void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 {
+	// Avoid cam jumps by checking whether the mouse cursor enters window for the first time
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
 	GLfloat xoffset = xpos - lastX;
 	GLfloat yoffset = lastY - ypos;
 	lastX = xpos;
@@ -364,4 +376,6 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	front.y = sin(glm::radians(pitch));
 	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
 	cameraFront = glm::normalize(front);
+
+	
 }
