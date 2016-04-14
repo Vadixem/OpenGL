@@ -340,6 +340,12 @@ void do_movement()
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (keys[GLFW_KEY_D])
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	// Add extra accending and descending movement(by y axis)
+	if (keys[GLFW_KEY_LEFT_SHIFT] || keys[GLFW_KEY_LEFT_CONTROL])
+		cameraPos.y -= 0.5f * cameraSpeed;
+	if (keys[GLFW_KEY_SPACE] )
+		cameraPos.y += 0.5f * cameraSpeed;
+	
 }
 
 void mouse_callback(GLFWwindow * window, double xpos, double ypos)
@@ -357,7 +363,7 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	GLfloat sensitivity = 0.05f;
+	GLfloat sensitivity = 0.07f;
 	xoffset *= sensitivity;
 	yoffset *= sensitivity;
 
