@@ -23,6 +23,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // For pseudo-parrallel input handling
 void do_movement();
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xpos, double ypos);
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -54,6 +55,9 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 // This bool helps in preventing cam jumps
 	GLboolean firstMouse = true;
 
+// Global field of view value
+	GLfloat fov = 40.f;
+
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
@@ -74,6 +78,8 @@ int main()
     glfwSetKeyCallback(window, key_callback);
 	// Set callback func for mouse input
 	glfwSetCursorPosCallback(window, mouse_callback);
+	// Set callback func for mouse input
+	glfwSetScrollCallback(window, scroll_callback);
 
     // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
     glewExperimental = GL_TRUE;
@@ -220,7 +226,7 @@ int main()
 
 	// Projection matrix.
 	glm::mat4 projection;
-	projection = glm::perspective(45.0f, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
+	projection = glm::perspective(fov, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -341,9 +347,10 @@ void do_movement()
     if (keys[GLFW_KEY_D])
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	// Add extra accending and descending movement(by y axis)
-	if (keys[GLFW_KEY_LEFT_SHIFT] || keys[GLFW_KEY_LEFT_CONTROL])
+	if (keys[GLFW_KEY_LEFT_CONTROL])
 		cameraPos.y -= 0.5f * cameraSpeed;
-	if (keys[GLFW_KEY_SPACE] )
+
+	if (keys[GLFW_KEY_LEFT_SHIFT] || keys[GLFW_KEY_SPACE] )
 		cameraPos.y += 0.5f * cameraSpeed;
 	
 }
@@ -382,6 +389,16 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	front.y = sin(glm::radians(pitch));
 	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
 	cameraFront = glm::normalize(front);
-
 	
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+
+	if (fov >= 1.f && fov <= 45.f)
+		fov -= yoffset;
+	if (fov <= 1.f)
+		fov = 1.f;
+	if (fov >= 45.f)
+		fov = 45.f;
 }
