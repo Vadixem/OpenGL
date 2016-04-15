@@ -7,6 +7,7 @@
 // GLFW
 #include <GLFW/glfw3.h>
 
+#include <thread>
 
 // Other Libs
 #include <SOIL/SOIL.h>
@@ -56,7 +57,7 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 	GLboolean firstMouse = true;
 
 // Global field of view value
-	GLfloat fov = 40.f;
+	GLfloat fov = 45.f;
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -224,9 +225,6 @@ int main()
 	glm::mat4 view;
 	view = glm::translate(view, glm::vec3(0.f, 0.f, -1.8f));
 
-	// Projection matrix.
-	glm::mat4 projection;
-	projection = glm::perspective(fov, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -277,6 +275,10 @@ int main()
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 
+	
+	// Projection matrix.
+	glm::mat4 projection;
+	projection = glm::perspective(fov, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -347,10 +349,10 @@ void do_movement()
     if (keys[GLFW_KEY_D])
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	// Add extra accending and descending movement(by y axis)
-	if (keys[GLFW_KEY_LEFT_CONTROL])
+	if (keys[GLFW_KEY_Q] || keys[GLFW_KEY_LEFT_CONTROL])
 		cameraPos.y -= 0.5f * cameraSpeed;
 
-	if (keys[GLFW_KEY_LEFT_SHIFT] || keys[GLFW_KEY_SPACE] )
+	if ( keys[GLFW_KEY_E] || keys[GLFW_KEY_LEFT_SHIFT] || keys[GLFW_KEY_SPACE] )
 		cameraPos.y += 0.5f * cameraSpeed;
 	
 }
@@ -396,7 +398,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 
 	if (fov >= 1.f && fov <= 45.f)
-		fov -= yoffset;
+		fov -= yoffset/5;
 	if (fov <= 1.f)
 		fov = 1.f;
 	if (fov >= 45.f)
