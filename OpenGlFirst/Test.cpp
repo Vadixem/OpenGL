@@ -27,7 +27,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xpos, double ypos);
 
 // Window dimensions
-const GLuint WIDTH = 800, HEIGHT = 600;
+const GLuint WIDTH = 1200, HEIGHT = 800;
 
 
 	// Walk around
@@ -57,7 +57,9 @@ const GLuint WIDTH = 800, HEIGHT = 600;
 	GLboolean firstMouse = true;
 
 // Global field of view value
-	GLfloat fov = 45.f;
+	GLfloat fov = -100.f;
+
+	// I want cube to 
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -200,7 +202,7 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // Load, create texture and generate mipmaps
-    image = SOIL_load_image("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\images\\trump.jpg",
+    image = SOIL_load_image("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\images\\demon.jpg",
 		&width, &height, 0, SOIL_LOAD_RGB);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -253,7 +255,7 @@ int main()
 
         // Render
         // Clear the colorbuffer
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(.03f, .01f, .09f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -317,6 +319,7 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
+	
     // Terminate GLFW, clearing any resources allocated by GLFW.
     glfwTerminate();
     return 0;
@@ -403,4 +406,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 		fov = 1.f;
 	if (fov >= 45.f)
 		fov = 45.f;
+
+	
 }
