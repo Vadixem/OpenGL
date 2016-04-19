@@ -57,7 +57,7 @@ const GLuint WIDTH = 1200, HEIGHT = 800;
 	GLboolean firstMouse = true;
 
 // Global field of view value
-	GLfloat fov = -100.f;
+	GLfloat fov = 45.f;
 
 	// I want cube to 
 
@@ -234,12 +234,12 @@ int main()
 	// Draw moar cubes!
 	glm::vec3 cubePositions[] = 
 	{
-		glm::vec3( 0.0f, 0.0f, 0.0f),
-		glm::vec3( 2.0f, 5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3( 2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f, 3.0f, -7.5f),
+		glm::vec3( 0.0f, .0f, 0.0f),
+		glm::vec3( 2.0f, .0f, -15.0f),
+		glm::vec3(-1.5f, .0f, -2.5f),
+		glm::vec3(-3.8f, .0f, -12.3f),
+		glm::vec3( 2.4f, .0f, -3.5f),
+		glm::vec3(-1.7f, .0f, -7.5f),
 
 		glm::vec3( 1.5f, 2.0f, -2.5f),
 		glm::vec3( 1.5f, 0.2f, -1.5f),
@@ -296,19 +296,40 @@ int main()
 		// Activate shader
         ourShader.Use();       
 
-       // Draw container
+		GLfloat angle = 0.f;
+        GLfloat sign;
+
+		// For spinning cubes around y axis.
+		GLfloat time = glfwGetTime();
+		// Draw container
         glBindVertexArray(VAO);
 		for (GLuint i = 0; i < 10; ++i)
 		{
+			
+			// every time sign changes
+			sign = i%2 == 0 ? -1.2f : 1.2f;
 			glm::mat4 model;
 			model = glm::translate(model,
-				glm::vec3(cubePositions[i].x,
-				cubePositions[i].y ,
-				cubePositions[i].z ));
-			GLfloat angle = 20.f * i;
-			model = glm::rotate(model, angle, glm::vec3(1.f, .3f, .5f));
+				glm::vec3(cos(glm::radians(angle))*5.f,
+				0.f ,
+				5.f*(-sin(glm::radians(angle)))));
+			
+			// Turn cubes by faces to center
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(0.f, 1.f, 0.f));
+			// Turn cubes by 90 over x
+			model = glm::rotate(model, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+			model = glm::translate(model, glm::vec3(0.f, 0.f, sign*cosf(glfwGetTime())));
+			GLfloat _180angle = glm::radians(180.f);
+			model = glm::translate(model, glm::vec3(
+				(cosf(glfwGetTime())*_180angle),
+				0.f,
+				sinf(glfwGetTime())*_180angle ));
+			angle += 36.f;
+			/*GLfloat angle = 20.f * i;
+			model = glm::rotate(model, angle, glm::vec3(1.f, .3f, .5f));*/
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		}
         glBindVertexArray(0);
 
