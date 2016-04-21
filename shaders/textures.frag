@@ -4,13 +4,8 @@ in vec2 TexCoord;
 
 out vec4 color;
 
-// Texture samplers
-uniform sampler2D ourTexture1;
-uniform sampler2D ourTexture2;
-
 void main()
 {
-	// Linearly interpolate between both textures (second texture is only slightly combined)
-	color = mix(texture(ourTexture1, TexCoord), texture(ourTexture2, TexCoord), 0.9);
-
+	// Set solid color(blue).
+	color = vec4(0.f, 0.02, 0.9, 1.f);
 }
