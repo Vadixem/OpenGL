@@ -18,7 +18,7 @@
 
 // Other includes
 #include "Shader.h"
-
+#include "Camera.h"
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 // For pseudo-parrallel input handling
@@ -36,6 +36,8 @@ const GLuint WIDTH = 1200, HEIGHT = 800;
 	glm::vec3 cameraFront = glm::vec3(0.f, 0.f, -1.f);
 	glm::vec3 cameraUp = glm::vec3(0.f, 1.f, 0.f);
 
+// Camera
+	Camera camera(glm::vec3(0.f, 0.f, 3.f));
 // For input handling
 	bool keys[1024];
 
@@ -59,7 +61,6 @@ const GLuint WIDTH = 1200, HEIGHT = 800;
 // Global field of view value
 	GLfloat fov = 45.f;
 
-	// I want cube to 
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -223,28 +224,8 @@ int main()
 	// Init model matrix and pitch it(x-axis) by 55 degrees.
 	glm::mat4 model;
 	
-	// Move all the scene far by z-axis by 3 units( I lied)
-	glm::mat4 view;
-	view = glm::translate(view, glm::vec3(0.f, 0.f, -1.8f));
-
-
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
-
-	// Draw moar cubes!
-	glm::vec3 cubePositions[] = 
-	{
-		glm::vec3( 0.0f, .0f, 0.0f),
-		glm::vec3( 2.0f, .0f, -15.0f),
-		glm::vec3(-1.5f, .0f, -2.5f),
-		glm::vec3(-3.8f, .0f, -12.3f),
-		glm::vec3( 2.4f, .0f, -3.5f),
-		glm::vec3(-1.7f, .0f, -7.5f),
-
-		glm::vec3( 1.5f, 2.0f, -2.5f),
-		glm::vec3( 1.5f, 0.2f, -1.5f),
-		glm::vec3(-1.3f, 1.0f, -1.5f) 
-	};
 
 	// Game loop
     while (!glfwWindowShouldClose(window))
@@ -259,28 +240,23 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+	// Create camera transformation
+	glm::mat4 view;
+	view = camera.GetViewMatrix();
+	
 	// Create uniforms for model, view and proj matrices
 	GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
 	GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
 	GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
 	
-		glm::mat4 view;
-		// Create moveable and controllable point viewer
-		view = glm::lookAt(
-			cameraPos,
-			cameraPos + cameraFront,
-			cameraUp
-			);
-
 	// Time from moment glfw initialized.
 	currentFrame = glfwGetTime();
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
-
 	
 	// Projection matrix.
 	glm::mat4 projection;
-	projection = glm::perspective(fov, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
+	projection = glm::perspective(camera.Zoom, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -307,7 +283,7 @@ int main()
 		{
 			
 			// every time sign changes
-			sign = i%2 == 0 ? -1.2f : 1.2f;
+			sign = i%2 == 0 ? -5.2f : 5.2f;
 			glm::mat4 model;
 			model = glm::translate(model,
 				glm::vec3(cos(glm::radians(angle))*5.f,
@@ -321,9 +297,10 @@ int main()
 			model = glm::translate(model, glm::vec3(0.f, 0.f, sign*cosf(glfwGetTime())));
 			GLfloat _180angle = glm::radians(180.f);
 			model = glm::translate(model, glm::vec3(
-				(cosf(glfwGetTime())*_180angle),
-				0.f,
-				sinf(glfwGetTime())*_180angle ));
+				cosf(glfwGetTime())*_180angle,
+				sinf(glfwGetTime())*_180angle,
+				0.f))
+				;
 			angle += 36.f;
 			/*GLfloat angle = 20.f * i;
 			model = glm::rotate(model, angle, glm::vec3(1.f, .3f, .5f));*/
@@ -362,23 +339,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void do_movement()
 {
-    // Camera controls
-    GLfloat cameraSpeed = 5.f * deltaTime;
     if (keys[GLFW_KEY_W])
-        cameraPos += cameraSpeed * cameraFront;
+		camera.ProcessKeyboard(FORWARD, deltaTime);
     if (keys[GLFW_KEY_S])
-        cameraPos -= cameraSpeed * cameraFront;
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
     if (keys[GLFW_KEY_A])
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (keys[GLFW_KEY_D])
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	// Add extra accending and descending movement(by y axis)
-	if (keys[GLFW_KEY_Q] || keys[GLFW_KEY_LEFT_CONTROL])
-		cameraPos.y -= 0.5f * cameraSpeed;
-
-	if ( keys[GLFW_KEY_E] || keys[GLFW_KEY_LEFT_SHIFT] || keys[GLFW_KEY_SPACE] )
-		cameraPos.y += 0.5f * cameraSpeed;
-	
+		camera.ProcessKeyboard(LEFT, deltaTime);
+    if (keys[GLFW_KEY_D])		
+		camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 void mouse_callback(GLFWwindow * window, double xpos, double ypos)
@@ -396,37 +364,11 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	GLfloat sensitivity = 0.07f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	// Add the offset values
-	yaw += xoffset;
-	pitch += yoffset;
-
-	// Add constraints to camera so user cannot do some weird cam moves
-	if (pitch > 89.f)
-		pitch = 89.f;
-	if (pitch < -89.f)
-		pitch = -89.f;
-
-	glm::vec3 front;
-	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-	front.y = sin(glm::radians(pitch));
-	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-	cameraFront = glm::normalize(front);
+	camera.ProcessMouseMovement(xoffset, yoffset);
 	
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-
-	if (fov >= 1.f && fov <= 45.f)
-		fov -= yoffset/5;
-	if (fov <= 1.f)
-		fov = 1.f;
-	if (fov >= 45.f)
-		fov = 45.f;
-
-	
+	camera.ProcessMouseScroll(yoffset);	
 }
