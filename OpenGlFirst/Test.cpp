@@ -49,7 +49,7 @@ const GLuint WIDTH = 1200, HEIGHT = 800;
 	GLfloat currentFrame;
 	
 // Set cursor to the center of the screen
-	GLfloat lastX = 400, lastY = 300;
+	GLfloat lastX = 600, lastY = 400;
 
 // Add global yaw and pitch values
 	GLfloat yaw   = -90.0f;	// Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right (due to how Eular angles work) so we initially rotate a bit to the left.
@@ -60,6 +60,9 @@ const GLuint WIDTH = 1200, HEIGHT = 800;
 
 // Global field of view value
 	GLfloat fov = 45.f;
+
+	// Position on the light source.
+	glm::vec3 lightPos(1.f, 1.f, 3.f);
 
 
 // The MAIN function, from here we start the application and run the game loop
@@ -98,86 +101,84 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Build and compile our shader program
-	    Shader ourShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\textures.vs", 
-		"C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\textures.frag");
+	    Shader lightningShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lightning.vs", 
+		"C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lightning.frag");
+		Shader lampShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lamp.vs", 
+		"C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lamp.frag");
 
-
-    // Set up vertex data (and buffer(s)) and attribute pointers for 1 CUBE
+    // Set up vertex data (and buffer(s)) and attribute pointers for CUBE
    GLfloat vertices[] = 
    {
-     -0.5f, -0.5f, -0.5f, 
-     0.5f, -0.5f, -0.5f,  
-     0.5f,  0.5f, -0.5f,  
-     0.5f,  0.5f, -0.5f,  
-    -0.5f,  0.5f, -0.5f,  
-    -0.5f, -0.5f, -0.5f,  
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
 
-    -0.5f, -0.5f,  0.5f,  
-     0.5f, -0.5f,  0.5f,  
-     0.5f,  0.5f,  0.5f,  
-     0.5f,  0.5f,  0.5f,  
-    -0.5f,  0.5f,  0.5f,  
-    -0.5f, -0.5f,  0.5f,  
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
 
-    -0.5f,  0.5f,  0.5f,  
-    -0.5f,  0.5f, -0.5f,  
-    -0.5f, -0.5f, -0.5f,  
-    -0.5f, -0.5f, -0.5f,  
-    -0.5f, -0.5f,  0.5f,  
-    -0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
 
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
 
-    -0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f, -0.5f,  0.5f,
-    -0.5f, -0.5f,  0.5f,
-    -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
 
-    -0.5f,  0.5f, -0.5f,
-     0.5f,  0.5f, -0.5f,
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f,  0.5f
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f
+
    };
     
 
-    GLuint VBO, VAO;
-    glGenVertexArrays(1, &VAO);
+    GLuint VBO, boxVAO;
+    glGenVertexArrays(1, &boxVAO);
     glGenBuffers(1, &VBO);
     
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	glBindVertexArray(boxVAO);    
     // Position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
- 
-    glBindVertexArray(0); // Unbind VAO
+    glBindVertexArray(0); // Unbind boxVAO
 
+	// Set the light's VAO, VBO stays the same
+	GLuint lightVAO;
+	glGenVertexArrays(1, &lightVAO);
+	glBindVertexArray(lightVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// Set the vert attribs (only position for the lamp)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE , 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindVertexArray(0);
 
-		// Specify orthogonal projection matrix
-	glm::ortho
-		( 
-		0.0f,	// left coordinate
-		800.f,	// right coord
-		0.0f,	// bottom
-		600.f,	// top coord of frustrum (усеченный конус)
-		0.1f,   // distance to near plane
-		100.f	// to far plane
-		);
 	
-	// Init model matrix and pitch it(x-axis) by 55 degrees.
+	// Init model matrix.
 	glm::mat4 model;
-	
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
@@ -190,52 +191,69 @@ int main()
 
         // Render
         // Clear the colorbuffer
-        glClearColor(.03f, .01f, .09f, 1.f);
+        //glClearColor(.03f, .01f, .09f, 1.f);
+		glClearColor(.1f, .1f, .1f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// Use coresponding shader when setting uniforms/drawing objs
+		lightningShader.Use();
+
+	GLint objectColorLoc = glGetUniformLocation(lightningShader.Program, "objectColor");
+	GLint lightColorLoc = glGetUniformLocation(lightningShader.Program, "lightColor");
+	glUniform3f(objectColorLoc, 0.f, 0.2f, 0.9f);
+	glUniform3f(lightColorLoc, 1.f, 0.5f, 1.f); // Set color white	
 
 	// Create camera transformation
 	glm::mat4 view;
 	view = camera.GetViewMatrix();
-	
+	// Projection matrix.
+	glm::mat4 projection;
+	projection = glm::perspective(camera.Zoom, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
+
 	// Create uniforms for model, view and proj matrices
-	GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
-	GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
-	GLint projLoc = glGetUniformLocation(ourShader.Program, "projection");
+	GLint modelLoc = glGetUniformLocation(lightningShader.Program, "model");
+	GLint viewLoc = glGetUniformLocation(lightningShader.Program, "view");
+	GLint projLoc = glGetUniformLocation(lightningShader.Program, "projection");
 	
 	// Time from moment glfw initialized.
 	currentFrame = glfwGetTime();
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	
-	// Projection matrix.
-	glm::mat4 projection;
-	projection = glm::perspective(camera.Zoom, (float)WIDTH/(float)HEIGHT , .1f, 100.f);
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
     
-		// Activate shader
-        ourShader.Use();       
-
-		// For spinning cubes around y axis.
-		GLfloat time = glfwGetTime();
-		// Draw container
-        glBindVertexArray(VAO);
-		
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		
+	// Draw container (using box vertex attribs)
+		glBindVertexArray(boxVAO);
+		glm::mat4 model;
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
 
-        // Swap the screen buffers
+	// Draw the lamp obj, again binding the appropriate shader
+		lampShader.Use();
+		// Get location obj for the matrices on the lamp shader
+		// (these could be different on different shaders)
+		modelLoc = glGetUniformLocation(lampShader.Program, "model");
+		viewLoc = glGetUniformLocation(lampShader.Program, "view");
+		projLoc = glGetUniformLocation(lampShader.Program, "projection");
+	
+		// Set matrices
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		model = glm::mat4();
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make  a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	// Draw the light obj (using light's vert attributes)
+		glBindVertexArray(lightVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+
+		// Swap the screen buffers
         glfwSwapBuffers(window);
     }
-    // Properly de-allocate all resources once they've outlived their purpose
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
 
-	
     // Terminate GLFW, clearing any resources allocated by GLFW.
     glfwTerminate();
     return 0;
@@ -265,6 +283,10 @@ void do_movement()
 		camera.ProcessKeyboard(LEFT, deltaTime);
     if (keys[GLFW_KEY_D])		
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (keys[GLFW_KEY_SPACE] || keys[GLFW_KEY_E])
+		camera.ProcessKeyboard(UP, deltaTime);
+	if (keys[GLFW_KEY_LEFT_SHIFT] || keys[GLFW_KEY_Q])
+		camera.ProcessKeyboard(DOWN, deltaTime);
 }
 
 void mouse_callback(GLFWwindow * window, double xpos, double ypos)
