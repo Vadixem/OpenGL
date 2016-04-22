@@ -15,7 +15,9 @@ enum Camera_Movement {
     FORWARD,
     BACKWARD,
     LEFT,
-    RIGHT
+    RIGHT,
+	UP,
+	DOWN
 };
 
 // Default camera values
@@ -81,7 +83,11 @@ public:
             this->Position -= this->Right * velocity;
         if (direction == RIGHT)
             this->Position += this->Right * velocity;
-    }
+		if (direction == UP)
+			this->Position.y += 0.7f * velocity;
+		if (direction == DOWN)
+			this->Position.y -= 0.7f * velocity;
+	}
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(GLfloat xoffset, GLfloat yoffset, GLboolean constrainPitch = true)
@@ -109,7 +115,7 @@ public:
     void ProcessMouseScroll(GLfloat yoffset)
     {
         if (this->Zoom >= 1.0f && this->Zoom <= 45.0f)
-            this->Zoom -= yoffset;
+            this->Zoom -= yoffset/5;
         if (this->Zoom <= 1.0f)
             this->Zoom = 1.0f;
         if (this->Zoom >= 45.0f)

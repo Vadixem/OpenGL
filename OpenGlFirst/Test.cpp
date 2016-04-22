@@ -166,7 +166,8 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0); // Unbind boxVAO
-
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	// Set the light's VAO, VBO stays the same
 	GLuint lightVAO;
 	glGenVertexArrays(1, &lightVAO);
@@ -246,7 +247,7 @@ int main()
 		model = glm::scale(model, glm::vec3(0.2f)); // Make  a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	// Draw the light obj (using light's vert attributes)
-		glBindVertexArray(lightVAO);
+		glBindVertexArray(boxVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
