@@ -14,9 +14,12 @@ void main()
 	vec3 ambient = ambientStrength * lightColor;
 	vec3 norm = normalize(Normal);
 	vec3 lightDir = normalize(lightPos - FragPos);
-
-	float diff = max(dot(vec3(1.f, 0.f,0.f), lightDir), 0.0);
-	vec3 diffuse = diff * lightColor;
+	vec3 distanceVec = lightPos - FragPos; 
+	float distance = sqrt(pow(distanceVec.x, 2) + pow(distanceVec.y, 2) + pow(distanceVec.z, 2)); 
+	float maxim = 7.f;
+	float intencity = max((maxim - distance)/maxim, ambientStrength);
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec3 diffuse = diff * intencity * lightColor;
 	vec3 result = (ambient + diffuse) * objectColor;	
 	color = vec4(result, 1.0f);
 }

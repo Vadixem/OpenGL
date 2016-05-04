@@ -268,7 +268,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void do_movement();
 
 // Window dimensions
-const GLuint WIDTH = 800, HEIGHT = 600;
+const GLuint WIDTH = 1200, HEIGHT = 800;
 
 // Camera
 Camera  camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -277,7 +277,7 @@ GLfloat lastY  =  HEIGHT / 2.0;
 bool    keys[1024];
 
 // Light attributes
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(1.2f, 1.0f, 3.f);
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -326,6 +326,7 @@ int main()
 
     // Set up vertex data (and buffer(s)) and attribute pointers
     GLfloat vertices[] = {
+		// Coords			 // Normals
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
          0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -418,9 +419,9 @@ int main()
         GLint objectColorLoc = glGetUniformLocation(lightingShader.Program, "objectColor");
         GLint lightColorLoc  = glGetUniformLocation(lightingShader.Program, "lightColor");
         GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "lightPos");
-        glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
+		glUniform3f(objectColorLoc, 1.f, 1.f, 0.0f);
         glUniform3f(lightColorLoc,  1.0f, 1.0f, 1.0f);
-        glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
 
 
         // Create camera transformations
@@ -438,6 +439,7 @@ int main()
         // Draw the container (using container's vertex attributes)
         glBindVertexArray(containerVAO);
         glm::mat4 model;
+		model = glm::translate(model, glm::vec3(0.f, 0.f, sinf(glfwGetTime())*5.f));
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
