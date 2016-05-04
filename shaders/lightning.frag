@@ -7,6 +7,7 @@ out vec4 color;
 uniform vec3 objectColor;
 uniform vec3 lightColor;
 uniform vec3 lightPos;
+uniform vec3 viewPos;
 
 void main()
 {
@@ -14,12 +15,21 @@ void main()
 	vec3 ambient = ambientStrength * lightColor;
 	vec3 norm = normalize(Normal);
 	vec3 lightDir = normalize(lightPos - FragPos);
+
 	vec3 distanceVec = lightPos - FragPos; 
 	float distance = sqrt(pow(distanceVec.x, 2) + pow(distanceVec.y, 2) + pow(distanceVec.z, 2)); 
-	float maxim = 7.f;
+	float maxim = 25.f;
 	float intencity = max((maxim - distance)/maxim, ambientStrength);
+
+	float specularStrength = 0.5f;
+	vec3 viewDir = normalize(viewPos - FragPos);
+	vec3 reflectDir = reflect(-lightDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0f), 32);
+	vec3 specular = specularStrength * spec * lightColor;	
+
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = diff * intencity * lightColor;
-	vec3 result = (ambient + diffuse) * objectColor;	
+	vec3 result = (ambient + diffuse + specular) * objectColor;	
 	color = vec4(result, 1.0f);
+
 }

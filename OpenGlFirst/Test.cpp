@@ -419,8 +419,8 @@ int main()
         GLint objectColorLoc = glGetUniformLocation(lightingShader.Program, "objectColor");
         GLint lightColorLoc  = glGetUniformLocation(lightingShader.Program, "lightColor");
         GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "lightPos");
-		glUniform3f(objectColorLoc, 1.f, 1.f, 0.0f);
-        glUniform3f(lightColorLoc,  1.0f, 1.0f, 1.0f);
+		glUniform3f(objectColorLoc, 1.0f, 1.0f, 1.0f);
+        glUniform3f(lightColorLoc,  1.0f, 1.0f, 0.2f);
 		glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
 
 
@@ -432,14 +432,17 @@ int main()
         GLint modelLoc = glGetUniformLocation(lightingShader.Program, "model");
         GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
         GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
-        // Pass the matrices to the shader
+		// Send position of the camera(view) to fragment shader in order to perform specular lightning
+		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
+		glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
+		// Pass the matrices to the shader
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         // Draw the container (using container's vertex attributes)
         glBindVertexArray(containerVAO);
         glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0.f, 0.f, sinf(glfwGetTime())*5.f));
+		model = glm::translate(model, glm::vec3(0.f, 0.f, /*tanf(glfwGetTime()/5)*5.f)*/ 2.f));
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
