@@ -419,9 +419,27 @@ int main()
         GLint objectColorLoc = glGetUniformLocation(lightingShader.Program, "objectColor");
         GLint lightColorLoc  = glGetUniformLocation(lightingShader.Program, "lightColor");
         GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "lightPos");
-		glUniform3f(objectColorLoc, 1.0f, 1.0f, 1.0f);
-        glUniform3f(lightColorLoc,  1.0f, 1.0f, 0.2f);
-		glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
+		// Newly created material specs.
+		GLint matAmbientLoc  = glGetUniformLocation(lightingShader.Program, "material.ambient");
+		GLint matDiffuseLoc  = glGetUniformLocation(lightingShader.Program, "material.diffuse");
+		GLint matSpecularLoc = glGetUniformLocation(lightingShader.Program, "material.specular");
+		GLint matShineLoc    = glGetUniformLocation(lightingShader.Program, "material.shininess");
+		
+		glUniform3f(objectColorLoc, 1.f, 1.f, .0f);
+        glUniform3f(lightColorLoc,  1.f, 1.0f, 1.0f);
+		
+		glUniform3f(matAmbientLoc,  1.f, 0.5f, 0.31f);
+		glUniform3f(matDiffuseLoc,  1.f, 0.5f, 0.31f);
+		glUniform3f(matSpecularLoc,  0.5f, 0.5f, 0.5f);
+		glUniform1f(matShineLoc,  32.0f);
+	
+		// Make the lamp cube run circles around y-axis.
+		GLfloat xRotOffset, yRotOffset, zRotOffset, multiplier;
+		xRotOffset = cosf(glfwGetTime());
+		yRotOffset = cosf(glfwGetTime())*cosf(glfwGetTime()) - 0.5f;
+		zRotOffset = sinf(glfwGetTime());
+		multiplier = 3.f;
+		glUniform3f(lightPosLoc,    xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier);
 
 
         // Create camera transformations
@@ -457,7 +475,7 @@ int main()
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
         model = glm::mat4();
-        model = glm::translate(model, lightPos);
+		model = glm::translate(model, glm::vec3(xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier));
         model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         // Draw the light object (using light's vertex attributes)
