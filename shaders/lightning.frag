@@ -8,6 +8,16 @@ struct Material
 };
 uniform Material material;
 
+struct Light
+{
+	vec3 position;
+	
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+uniform Light light;
+
 in vec3 FragPos;
 in vec3 Normal;
 
@@ -21,12 +31,12 @@ uniform vec3 viewPos;
 void main()
 {
 	// Ambient
-	vec3 ambient = lightColor * material.ambient;
+	vec3 ambient = light.ambient * material.ambient;
 	
 	// Distance
 	vec3 distanceVec = lightPos - FragPos; 
 	float distance = sqrt(pow(distanceVec.x, 2) + pow(distanceVec.y, 2) + pow(distanceVec.z, 2)); 
-	float maxim = 25.f;
+	float maxim = 30.f;
 	float intencity = max((maxim - distance)/maxim, 0.0001f);
 		
 
@@ -34,7 +44,7 @@ void main()
 	vec3 norm = normalize(Normal);
 	vec3 lightDir = normalize(lightPos - FragPos);
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = intencity * lightColor * (diff * material.diffuse);
+	vec3 diffuse = intencity * light.diffuse * (diff * material.diffuse);
 	
 	// Specular
 	vec3 viewDir = normalize(viewPos - FragPos);
