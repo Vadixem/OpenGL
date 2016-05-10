@@ -202,7 +202,7 @@ int main()
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
 
         GLint lightColorLoc  = glGetUniformLocation(lightingShader.Program, "lightColor");
-        GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "lightPos");
+        GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "light.position");
 		// Newly created material specs.
 		GLint matSpecularLoc = glGetUniformLocation(lightingShader.Program, "material.specular");
 		GLint matShineLoc    = glGetUniformLocation(lightingShader.Program, "material.shininess");
@@ -212,10 +212,14 @@ int main()
 		GLint lightDiffuseLoc  = glGetUniformLocation(lightingShader.Program, "light.diffuse");
 		GLint lightSpecularLoc = glGetUniformLocation(lightingShader.Program, "light.specular");
 		
+		glUniform3f(lightAmbientLoc,  .2f, 0.2f, 0.2f);
 		glUniform3f(lightColorLoc,  1.f, 1.0f, 1.0f);
-		glUniform3f(matSpecularLoc,  0.5f, 0.5f, 0.5f);
-		glUniform1f(matShineLoc, 64.0f);
+		glUniform3f(lightDiffuseLoc, 0.7, 0.7, 0.7);
+		glUniform3f(lightSpecularLoc,  1.f, 1.f, 1.f);
 	
+		glUniform3f(matSpecularLoc,  0.5f, 0.5f, 0.5f);
+		glUniform1f(matShineLoc, 32.0f);
+		
         // Create camera transformations
         glm::mat4 view;
         view = camera.GetViewMatrix();
@@ -231,16 +235,12 @@ int main()
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		glUniform3f(lightAmbientLoc,  .2f, 0.2f, 0.2f);
-		glUniform3f(lightDiffuseLoc,  0.5f, 0.5f, 0.5f);
-		glUniform3f(lightSpecularLoc,  1.f, 1.f, 1.f);
-	
 		// Make the lamp cube run circles around y-axis.
 		GLfloat xRotOffset, yRotOffset, zRotOffset, multiplier;
 		xRotOffset = cosf(glfwGetTime());
 		yRotOffset =  0.1f /*cosf(glfwGetTime())*cosf(glfwGetTime()) - 0.5f*/;
 		zRotOffset = sinf(glfwGetTime());
-		multiplier = 3.f;
+		multiplier = 5.f;
 		glUniform3f(lightPosLoc,    xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier);
 
 
