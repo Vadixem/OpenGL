@@ -161,8 +161,9 @@ int main()
     glBindVertexArray(0);
     
 		// Generate a texture
- 		GLuint diffuseMap;		
+ 		GLuint diffuseMap, specularMap;		
 		glGenTextures(1, &diffuseMap);
+		glGenTextures(2, &specularMap);
 		int width, height;
  		unsigned char* image = SOIL_load_image("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\images\\container2.png",
  			&width, &height, 0, SOIL_LOAD_RGB);
@@ -171,6 +172,18 @@ int main()
  		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
  			GL_UNSIGNED_BYTE, image);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		//SOIL_free_image_data(image);
+		
+		// Spec map
+ 		image = SOIL_load_image("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\images\\container2spec.png",
+ 			&width, &height, 0, SOIL_LOAD_RGB);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+		// Generate a text using the prev-ly loaded image.
+ 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+ 			GL_UNSIGNED_BYTE, image);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		// Free the image mem and unbind the text obj.
+ 		
 		// Free the image mem and unbind the text obj.
  		SOIL_free_image_data(image);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -200,6 +213,7 @@ int main()
         lightingShader.Use();
 		// Set texture units
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
 
         GLint lightColorLoc  = glGetUniformLocation(lightingShader.Program, "lightColor");
         GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "light.position");
@@ -218,7 +232,7 @@ int main()
 		glUniform3f(lightSpecularLoc,  1.f, 1.f, 1.f);
 	
 		glUniform3f(matSpecularLoc,  0.5f, 0.5f, 0.5f);
-		glUniform1f(matShineLoc, 32.0f);
+		glUniform1f(matShineLoc, 64.0f);
 		
         // Create camera transformations
         glm::mat4 view;
@@ -241,12 +255,17 @@ int main()
 		yRotOffset =  0.1f /*cosf(glfwGetTime())*cosf(glfwGetTime()) - 0.5f*/;
 		zRotOffset = sinf(glfwGetTime());
 		multiplier = 5.f;
-		glUniform3f(lightPosLoc,    xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier);
+		// glUniform3f(lightPosLoc,    xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier);
+		glUniform3f(lightPosLoc,    3.0, 0.55, 4.0);
 
 
 		// Bind diffuse map
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+		// Bind spec map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
 
         // Draw the container (using container's vertex attributes)
         glBindVertexArray(containerVAO);
@@ -266,8 +285,9 @@ int main()
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
         model = glm::mat4();
-		model = glm::translate(model, glm::vec3(xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier));
-        model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		// model = glm::translate(model, glm::vec3(xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier));
+        model = glm::translate(model, glm::vec3( 3.0, 0.55, 4.0));
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         // Draw the light object (using light's vertex attributes)
         glBindVertexArray(lightVAO);
