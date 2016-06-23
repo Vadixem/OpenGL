@@ -85,6 +85,22 @@ int main()
 		Shader lampShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lamp.vs", 
 		"C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lamp.frag");
 
+		// Draw moar cubes!
+	glm::vec3 cubePositions[] = 
+	{
+		glm::vec3( 0.0f, 0.0f, 0.0f),
+		glm::vec3( 2.0f, 5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3( 2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f, 3.0f, -7.5f),
+		glm::vec3( 1.3f, -2.0f, -2.5f),
+		glm::vec3( 1.5f, 2.0f, -2.5f),
+		glm::vec3( 1.5f, 0.2f, -1.5f),
+		glm::vec3(-1.3f, 1.0f, -1.5f) 
+	};
+
+
   GLfloat vertices[] = {
     // Positions           // Normals           // Texture Coords
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
@@ -225,12 +241,14 @@ int main()
 		GLint lightAmbientLoc  = glGetUniformLocation(lightingShader.Program, "light.ambient");
 		GLint lightDiffuseLoc  = glGetUniformLocation(lightingShader.Program, "light.diffuse");
 		GLint lightSpecularLoc = glGetUniformLocation(lightingShader.Program, "light.specular");
-		
+		GLint lightDirPos = glGetUniformLocation(lightingShader.Program, "light.direction");
+
 		glUniform3f(lightAmbientLoc,  .2f, 0.2f, 0.2f);
 		glUniform3f(lightColorLoc,  1.f, 1.0f, 1.0f);
 		glUniform3f(lightDiffuseLoc, 0.7, 0.7, 0.7);
 		glUniform3f(lightSpecularLoc,  1.f, 1.f, 1.f);
-	
+		glUniform3f(lightDirPos, -.2f, -1.f, -.3f);
+
 		glUniform3f(matSpecularLoc,  0.5f, 0.5f, 0.5f);
 		glUniform1f(matShineLoc, 64.0f);
 		
@@ -256,7 +274,7 @@ int main()
 		zRotOffset = sinf(glfwGetTime());
 		multiplier = 5.f;
 		// glUniform3f(lightPosLoc,    xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier);
-		glUniform3f(lightPosLoc,    3.0, 0.55, 4.0);
+		glUniform3f(lightPosLoc, 3.0, 0.55, 4.0);
 
 
 		// Bind diffuse map
@@ -270,10 +288,17 @@ int main()
         // Draw the container (using container's vertex attributes)
         glBindVertexArray(containerVAO);
         glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0.f, 0.f, /*tanf(glfwGetTime()/5)*5.f)*/ 2.f));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+		       
+		for(GLuint i = 0; i < 10; i++) 
+		{
+			model = glm::mat4(); model = glm::translate(model, cubePositions[i]);
+			GLfloat angle = 20.0f * i; 
+			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f)); 
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, 36); 
+		}
+	
+		glBindVertexArray(0);
 
         // Also draw the lamp object, again binding the appropriate shader
         lampShader.Use();
@@ -281,6 +306,7 @@ int main()
         modelLoc = glGetUniformLocation(lampShader.Program, "model");
         viewLoc  = glGetUniformLocation(lampShader.Program, "view");
         projLoc  = glGetUniformLocation(lampShader.Program, "projection");
+
         // Set matrices
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -289,11 +315,13 @@ int main()
         model = glm::translate(model, glm::vec3( 3.0, 0.55, 4.0));
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        // Draw the light object (using light's vertex attributes)
+
+		
+		// Draw the light object (using light's vertex attributes)
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
-
+		
         // Swap the screen buffers
         glfwSwapBuffers(window);
     }
