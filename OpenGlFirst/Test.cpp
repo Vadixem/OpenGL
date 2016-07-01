@@ -31,6 +31,9 @@ void do_movement();
 // Window dimensions
 const GLuint WIDTH = 1200, HEIGHT = 800;
 
+// Color of environment
+glm::vec3 environment_color(0.2f, 0.2f, 0.2f);
+
 // Camera
 Camera  camera(glm::vec3(0.0f, 0.0f, 3.0f));
 GLfloat lastX  =  WIDTH  / 2.0;
@@ -222,7 +225,7 @@ int main()
         do_movement();
 
         // Clear the colorbuffer
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(environment_color.x, environment_color.y, environment_color.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Use cooresponding shader when setting uniforms/drawing objects
@@ -243,7 +246,7 @@ int main()
 		GLint lightSpecularLoc = glGetUniformLocation(lightingShader.Program, "light.specular");
 		GLint lightDirPos = glGetUniformLocation(lightingShader.Program, "light.direction");
 
-		glUniform3f(lightAmbientLoc,  .2f, 0.2f, 0.2f);
+		glUniform3f(lightAmbientLoc, environment_color.x, environment_color.y, environment_color.z);
 		glUniform3f(lightColorLoc,  1.f, 1.0f, 1.0f);
 		glUniform3f(lightDiffuseLoc, 0.7, 0.7, 0.7);
 		glUniform3f(lightSpecularLoc,  1.f, 1.f, 1.f);
@@ -344,6 +347,42 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         else if (action == GLFW_RELEASE)
             keys[key] = false;
     }
+	// Environment color regulation
+#pragma region ENVIRONMENT_COLOR
+	// Increase red
+	if ((key == GLFW_KEY_KP_9 && action == GLFW_PRESS)
+		&&
+		(environment_color.x < 1.0f))
+		environment_color.x += 0.1;
+	// Decrease red
+	if ((key == GLFW_KEY_KP_7 && action == GLFW_PRESS)
+		&&
+		(environment_color.x > -0.1f))
+		environment_color.x -= 0.1;
+
+	// Increase green
+	if ((key == GLFW_KEY_KP_6 && action == GLFW_PRESS)
+		&&
+		(environment_color.y < 1.1f))
+		environment_color.y += 0.1;
+	// Decrease green
+	if ((key == GLFW_KEY_KP_4 && action == GLFW_PRESS)
+		&&
+		(environment_color.y > -0.1f))
+		environment_color.y -= 0.1;
+	// Increase green
+	if ((key == GLFW_KEY_KP_3 && action == GLFW_PRESS)
+		&&
+		(environment_color.z < 1.1f))
+		environment_color.z += 0.1;
+	// Decrease green
+	if ((key == GLFW_KEY_KP_1 && action == GLFW_PRESS)
+		&&
+		(environment_color.z > -0.1f))
+		environment_color.z -= 0.1;
+
+
+#pragma endregion
 }
 
 void do_movement()
