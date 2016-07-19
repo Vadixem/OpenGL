@@ -6,7 +6,6 @@
 
 // GLFW
 #include <GLFW/glfw3.h>
-
 #include <thread>
 
 // Other Libs
@@ -105,7 +104,7 @@ int main()
 
 
   GLfloat vertices[] = {
-    // Positions           // Normals           // Texture Coords
+    // Positions          // Normals          // Texture Coords
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
      0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
      0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
@@ -236,6 +235,7 @@ int main()
 
         GLint lightColorLoc  = glGetUniformLocation(lightingShader.Program, "lightColor");
         GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "light.position");
+		
 		// Newly created material specs.
 		GLint matSpecularLoc = glGetUniformLocation(lightingShader.Program, "material.specular");
 		GLint matShineLoc    = glGetUniformLocation(lightingShader.Program, "material.shininess");
@@ -244,14 +244,22 @@ int main()
 		GLint lightAmbientLoc  = glGetUniformLocation(lightingShader.Program, "light.ambient");
 		GLint lightDiffuseLoc  = glGetUniformLocation(lightingShader.Program, "light.diffuse");
 		GLint lightSpecularLoc = glGetUniformLocation(lightingShader.Program, "light.specular");
-		GLint lightDirPos = glGetUniformLocation(lightingShader.Program, "light.direction");
+		/*GLint lightDirPos = glGetUniformLocation(lightingShader.Program, "light.direction");*/
+ 
 
+		// For attenuation test
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "light.constant"), 1.0f); 
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "light.linear"), 0.045);    
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "light.quadratic") , 0.0075);
+ 
 		glUniform3f(lightAmbientLoc, environment_color.x, environment_color.y, environment_color.z);
 		glUniform3f(lightColorLoc,  1.f, 1.0f, 1.0f);
 		glUniform3f(lightDiffuseLoc, 0.7, 0.7, 0.7);
 		glUniform3f(lightSpecularLoc,  1.f, 1.f, 1.f);
-		glUniform3f(lightDirPos, -.2f, -1.f, -.3f);
+		/*glUniform3f(lightDirPos, -.2f, -1.f, -.3f);*/
 
+		// Position of attenuating light source is equivalent to pos of white little cube.
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
 		glUniform3f(matSpecularLoc,  0.5f, 0.5f, 0.5f);
 		glUniform1f(matShineLoc, 64.0f);
 		
@@ -315,7 +323,7 @@ int main()
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
         model = glm::mat4();
 		// model = glm::translate(model, glm::vec3(xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier));
-        model = glm::translate(model, glm::vec3( 3.0, 0.55, 4.0));
+        model = glm::translate(model, glm::vec3( lightPos.x, lightPos.y, lightPos.z));
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
