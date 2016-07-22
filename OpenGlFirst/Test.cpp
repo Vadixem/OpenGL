@@ -236,6 +236,8 @@ int main()
 #pragma region LIGHTING_SHADER
         // Use cooresponding shader when setting uniforms/drawing objects
         lightingShader.Use();
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);	
+ 		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
 		GLint lightPosLoc        = glGetUniformLocation(lightingShader.Program, "light.position");
         GLint lightSpotdirLoc    = glGetUniformLocation(lightingShader.Program, "light.direction");
         GLint lightSpotCutOffLoc = glGetUniformLocation(lightingShader.Program, "light.cutOff");        
