@@ -240,12 +240,14 @@ int main()
  		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
 		GLint lightPosLoc        = glGetUniformLocation(lightingShader.Program, "light.position");
         GLint lightSpotdirLoc    = glGetUniformLocation(lightingShader.Program, "light.direction");
-        GLint lightSpotCutOffLoc = glGetUniformLocation(lightingShader.Program, "light.cutOff");        
+        GLint lightSpotICutOffLoc = glGetUniformLocation(lightingShader.Program, "light.iCutOff");        
+		GLint lightSpotOCutOffLoc = glGetUniformLocation(lightingShader.Program, "light.oCutOff");        
         GLint viewPosLoc         = glGetUniformLocation(lightingShader.Program, "viewPos");
         glUniform3f(lightPosLoc,        camera.Position.x, camera.Position.y, camera.Position.z);
         glUniform3f(lightSpotdirLoc,    camera.Front.x, camera.Front.y, camera.Front.z);
-        glUniform1f(lightSpotCutOffLoc, glm::cos(glm::radians(15.0f)));
-        glUniform3f(viewPosLoc,         camera.Position.x, camera.Position.y, camera.Position.z);
+        glUniform1f(lightSpotICutOffLoc, glm::cos(glm::radians(12.5f)));
+		glUniform1f(lightSpotOCutOffLoc, glm::cos(glm::radians(17.5f)));
+		glUniform3f(viewPosLoc,         camera.Position.x, camera.Position.y, camera.Position.z);
         // Set lights properties
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),   environment_color.x/2.0,environment_color.y/2.0,environment_color.z/2.0);
         // We set the diffuse intensity a bit higher; note that the right lighting conditions differ with each lighting method and environment.
