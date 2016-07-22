@@ -18,6 +18,7 @@
 // Other includes
 #include "Shader.h"
 #include "Camera.h"
+
 // This bool helps in preventing cam jumps
 	GLboolean firstMouse = true;
 
@@ -49,6 +50,7 @@ GLfloat lastFrame = 0.0f;  	// Time of last frame
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
+#pragma region LIB_INITS
     // Init GLFW
     glfwInit();
     // Set all the required options for GLFW
@@ -77,16 +79,18 @@ int main()
     // Define the viewport dimensions
     glViewport(0, 0, WIDTH, HEIGHT);
 
+
     // OpenGL options
     glEnable(GL_DEPTH_TEST);
 
-
+#pragma endregion
     // Build and compile our shader program
 	    Shader lightingShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lightning.vs", 
 		"C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lightning.frag");
 		Shader lampShader("C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lamp.vs", 
 		"C:\\Users\\Vadim\\Documents\\Visual Studio 2012\\Projects\\OpenGlFirst\\shaders\\lamp.frag");
 
+#pragma region BUFFERS
 		// Draw moar cubes!
 	glm::vec3 cubePositions[] = 
 	{
@@ -177,7 +181,8 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0); // Note that we skip over the normal vectors
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
-    
+#pragma endregion
+#pragma region TEXTURES
 		// Generate a texture
  		GLuint diffuseMap, specularMap;		
 		glGenTextures(1, &diffuseMap);
@@ -210,7 +215,8 @@ int main()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
  		glBindTexture(GL_TEXTURE_2D, 0);
 
-	
+#pragma endregion
+#pragma region GAME_LOOP	
     // Game loop
     while (!glfwWindowShouldClose(window))
     {
@@ -227,91 +233,74 @@ int main()
 		glClearColor(environment_color.x, environment_color.y, environment_color.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#pragma region LIGHTING_SHADER
         // Use cooresponding shader when setting uniforms/drawing objects
         lightingShader.Use();
-		// Set texture units
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0);
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "material.specular"), 1);
+		GLint lightPosLoc        = glGetUniformLocation(lightingShader.Program, "light.position");
+        GLint lightSpotdirLoc    = glGetUniformLocation(lightingShader.Program, "light.direction");
+        GLint lightSpotCutOffLoc = glGetUniformLocation(lightingShader.Program, "light.cutOff");        
+        GLint viewPosLoc         = glGetUniformLocation(lightingShader.Program, "viewPos");
+        glUniform3f(lightPosLoc,        camera.Position.x, camera.Position.y, camera.Position.z);
+        glUniform3f(lightSpotdirLoc,    camera.Front.x, camera.Front.y, camera.Front.z);
+        glUniform1f(lightSpotCutOffLoc, glm::cos(glm::radians(15.0f)));
+        glUniform3f(viewPosLoc,         camera.Position.x, camera.Position.y, camera.Position.z);
+        // Set lights properties
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),   environment_color.x/2.0,environment_color.y/2.0,environment_color.z/2.0);
+        // We set the diffuse intensity a bit higher; note that the right lighting conditions differ with each lighting method and environment.
+        // Each environment and lighting type requires some tweaking of these variables to get the best out of your environment.
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),   0.8f, 0.8f, 0.8f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"),  1.0f, 1.0f, 1.0f);
+        glUniform1f(glGetUniformLocation(lightingShader.Program, "light.constant"),  1.0f);
+        glUniform1f(glGetUniformLocation(lightingShader.Program, "light.linear"),    0.09);
+        glUniform1f(glGetUniformLocation(lightingShader.Program, "light.quadratic"), 0.032);
+        // Set material properties
+        glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 64.0f);
 
-        GLint lightColorLoc  = glGetUniformLocation(lightingShader.Program, "lightColor");
-        GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "light.position");
-		
-		// Newly created material specs.
-		GLint matSpecularLoc = glGetUniformLocation(lightingShader.Program, "material.specular");
-		GLint matShineLoc    = glGetUniformLocation(lightingShader.Program, "material.shininess");
-		
-		// Newly created light specs.
-		GLint lightAmbientLoc  = glGetUniformLocation(lightingShader.Program, "light.ambient");
-		GLint lightDiffuseLoc  = glGetUniformLocation(lightingShader.Program, "light.diffuse");
-		GLint lightSpecularLoc = glGetUniformLocation(lightingShader.Program, "light.specular");
-		/*GLint lightDirPos = glGetUniformLocation(lightingShader.Program, "light.direction");*/
- 
-
-		// For attenuation test
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "light.constant"), 1.0f); 
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "light.linear"), 0.045);    
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "light.quadratic") , 0.0075);
- 
-		glUniform3f(lightAmbientLoc, environment_color.x, environment_color.y, environment_color.z);
-		glUniform3f(lightColorLoc,  1.f, 1.0f, 1.0f);
-		glUniform3f(lightDiffuseLoc, 0.7, 0.7, 0.7);
-		glUniform3f(lightSpecularLoc,  1.f, 1.f, 1.f);
-		/*glUniform3f(lightDirPos, -.2f, -1.f, -.3f);*/
-
-		// Position of attenuating light source is equivalent to pos of white little cube.
-		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(matSpecularLoc,  0.5f, 0.5f, 0.5f);
-		glUniform1f(matShineLoc, 64.0f);
-		
         // Create camera transformations
         glm::mat4 view;
         view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
         // Get the uniform locations
         GLint modelLoc = glGetUniformLocation(lightingShader.Program, "model");
-        GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
-        GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
-		// Send position of the camera(view) to fragment shader in order to perform specular lightning
-		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
-		glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
-		// Pass the matrices to the shader
+        GLint viewLoc  = glGetUniformLocation(lightingShader.Program, "view");
+        GLint projLoc  = glGetUniformLocation(lightingShader.Program, "projection");
+        // Pass the matrices to the shader
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		// Make the lamp cube run circles around y-axis.
-		GLfloat xRotOffset, yRotOffset, zRotOffset, multiplier;
-		xRotOffset = cosf(glfwGetTime());
-		yRotOffset =  0.1f /*cosf(glfwGetTime())*cosf(glfwGetTime()) - 0.5f*/;
-		zRotOffset = sinf(glfwGetTime());
-		multiplier = 5.f;
-		// glUniform3f(lightPosLoc,    xRotOffset* multiplier, yRotOffset*multiplier, zRotOffset*multiplier);
-		glUniform3f(lightPosLoc, 3.0, 0.55, 4.0);
-
-
-		// Bind diffuse map
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-		// Bind spec map
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
+        // Bind diffuse map
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
+        // Bind specular map
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
 
         // Draw the container (using container's vertex attributes)
-        glBindVertexArray(containerVAO);
+        /*glBindVertexArray(containerVAO);
         glm::mat4 model;
-		       
-		for(GLuint i = 0; i < 10; i++) 
-		{
-			model = glm::mat4(); model = glm::translate(model, cubePositions[i]);
-			GLfloat angle = 20.0f * i; 
-			model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f)); 
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			glDrawArrays(GL_TRIANGLES, 0, 36); 
-		}
-	
-		glBindVertexArray(0);
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);*/
 
-        // Also draw the lamp object, again binding the appropriate shader
+        // Draw 10 containers with the same VAO and VBO information; only their world space coordinates differ
+        glm::mat4 model;
+        glBindVertexArray(containerVAO);
+        for (GLuint i = 0; i < 10; i++)
+        {
+            model = glm::mat4();
+            model = glm::translate(model, cubePositions[i]);
+            GLfloat angle = 20.0f * i;
+            model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+        glBindVertexArray(0);
+
+#pragma endregion 
+/*
+#pragma region LAMP_SHADER
+		// Also draw the lamp object, again binding the appropriate shader
         lampShader.Use();
         // Get location objects for the matrices on the lamp shader (these could be different on a different shader)
         modelLoc = glGetUniformLocation(lampShader.Program, "model");
@@ -332,17 +321,18 @@ int main()
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
-		
-        // Swap the screen buffers
+#pragma endregion		
+ */
+  // Swap the screen buffers
         glfwSwapBuffers(window);
     }
-
+#pragma endregion 
     // Terminate GLFW, clearing any resources allocated by GLFW.
     glfwTerminate();
     return 0;
 }
 
-
+#pragma region FUNCTIONS
 // Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -432,3 +422,4 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(yoffset);	
 }
+#pragma endregion
